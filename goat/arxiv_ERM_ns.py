@@ -5,8 +5,8 @@ import torch.nn.functional as F
 from ogb.nodeproppred import PygNodePropPredDataset
 from torch_geometric.utils import to_undirected
 
-from large_model import Transformer
-from sampler import LocalSampler, dataset_drive_url, load_twitch_gamer, rand_train_test_idx, even_quantile_labels
+from .large_model import Transformer
+from .sampler import LocalSampler, dataset_drive_url, load_twitch_gamer, rand_train_test_idx, even_quantile_labels
 
 
 import time

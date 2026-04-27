@@ -13,7 +13,7 @@ from torch_geometric.nn.dense.linear import Linear
 from torch_geometric.typing import Adj, OptTensor, PairTensor
 from torch_geometric.utils import softmax
 
-from vq import VectorQuantizerEMA
+from .vq import VectorQuantizerEMA
 from einops import rearrange, repeat, reduce
 from einops.layers.torch import Rearrange
 
