@@ -58,6 +58,8 @@ class TransformerConv(MessagePassing):
         self.num_centroids = num_centroids
         self._alpha = None
 
+        # Projection matrix for self attention
+
         self.lin_key = Linear(in_channels, heads * out_channels)
         self.lin_query = Linear(in_channels, heads * out_channels)
         self.lin_value = Linear(in_channels, heads * out_channels)
@@ -66,11 +68,12 @@ class TransformerConv(MessagePassing):
         # else:
         #     self.lin_edge = self.register_parameter('lin_edge', None)
 
+        #Skip connection
         if concat:
             self.lin_skip = Linear(in_channels, heads * out_channels,
-                                   bias=bias)
+                                   bias=bias) #Adapt input features dimension to output dimension  
             if self.beta:
-                self.lin_beta = Linear(3 * heads * out_channels, 1, bias=False)
+                self.lin_beta = Linear(3 * heads * out_channels, 1, bias=False) #Learnable gating 
             else:
                 self.lin_beta = self.register_parameter('lin_beta', None)
         else:
@@ -80,19 +83,24 @@ class TransformerConv(MessagePassing):
             else:
                 self.lin_beta = self.register_parameter('lin_beta', None)
 
+        # Spatial encoding for local attention (b_{D(i,j)})
+        # Spatial size depend on the max distance between neightboors after discretization
         spatial_add_pad = 1
         self.spatial_encoder = torch.nn.Embedding(spatial_size+spatial_add_pad, heads)
         
         if self.conv_type != 'local' :
+
             self.vq = VectorQuantizerEMA(
                 num_centroids, 
                 global_dim, 
                 decay=0.99
-            )
-            c = torch.randint(0, num_centroids, (num_nodes,), dtype=torch.short)
+            ) #Object for Quantization of nodes to centroids
+
+            c = torch.randint(0, num_centroids, (num_nodes,), dtype=torch.short) #Codebook
             self.register_buffer('c_idx', c)
             self.attn_fn = F.softmax
 
+            # Projetion matrix for global self-attention
             self.lin_proj_g = Linear(in_channels, global_dim)
             self.lin_key_g = Linear(global_dim*2, heads * out_channels)
             self.lin_query_g = Linear(global_dim*2, heads * out_channels)

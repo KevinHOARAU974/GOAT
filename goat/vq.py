@@ -14,15 +14,15 @@ class VectorQuantizerEMA(nn.Module):
         ):
         super(VectorQuantizerEMA, self).__init__()
 
-        self._embedding_dim = embedding_dim
-        self._num_embeddings = num_embeddings
+        self._embedding_dim = embedding_dim #Dimension in global space (dimension d in the paper)
+        self._num_embeddings = num_embeddings #Number of centroids (dimension k in the paper)
 
-        self.register_buffer('_embedding', torch.randn(self._num_embeddings, self._embedding_dim*2))
-        self.register_buffer('_embedding_output', torch.randn(self._num_embeddings, self._embedding_dim*2))
-        self.register_buffer('_ema_cluster_size', torch.zeros(num_embeddings))
-        self.register_buffer('_ema_w', torch.randn(self._num_embeddings, self._embedding_dim*2))
+        self.register_buffer('_embedding', torch.randn(self._num_embeddings, self._embedding_dim*2)) #normalized centroids (dimension for featurs and positional encoding)  
+        self.register_buffer('_embedding_output', torch.randn(self._num_embeddings, self._embedding_dim*2)) #denormalized centroids
+        self.register_buffer('_ema_cluster_size', torch.zeros(num_embeddings)) #number of points in each cluster 
+        self.register_buffer('_ema_w', torch.randn(self._num_embeddings, self._embedding_dim*2)) #sum of all vectors assigned to each cluster
 
-        self._decay = decay
+        self._decay = decay #ema weight
         self.bn = torch.nn.BatchNorm1d(self._embedding_dim*2, affine=False)
 
 
